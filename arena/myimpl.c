@@ -32,9 +32,10 @@ void arena_free_all(Arena *a) {
 bool is_power_of_two(size_t x) { return (x & (x - 1)) == 0; }
 
 uintptr_t align_forward(uintptr_t ptr, size_t align) {
+  uintptr_t p, a, m;
+
   assert(is_power_of_two(align));
 
-  uintptr_t p, a, m;
   p = ptr;
   a = (uintptr_t)align;
   m = (p & (a - 1)); // p % a
@@ -48,8 +49,6 @@ uintptr_t align_forward(uintptr_t ptr, size_t align) {
 }
 
 void *arena_alloc_align(Arena *a, size_t size, size_t align) {
-  assert(is_power_of_two(align));
-
   uintptr_t curr_ptr = (uintptr_t)a->buf + a->curr_offset;
   uintptr_t offset = align_forward(curr_ptr, align);
   offset -= (uintptr_t)a->buf; // back to relative
@@ -75,9 +74,37 @@ void *arena_alloc(Arena *a, size_t size) {
 
 void *arena_realloc_align(Arena *a, void *old_memory, size_t old_size,
                           size_t new_size, size_t align) {
+  unsigned char *old_mem = (unsigned char *)old_memory;
+
   assert(is_power_of_two(align));
-  // TODO implement
-  return NULL;
+
+  if (old_mem == NULL || old_size == 0) {
+    return arena_alloc_align(a, new_size, align);
+  }
+
+  if (new_size == old_size) {
+    return old_mem;
+  }
+
+  if (old_mem < a->buf || a->buf + a->buf_len <= old_mem) {
+    assert(false || "Memory is out of bounds of the buffer in this arena");
+    return NULL;
+  }
+
+  if (a->buf + a->prev_offset == old_mem) {
+    a->curr_offset = a->prev_offset + new_size;
+    if (new_size > old_size) {
+      memset(a->buf + a->prev_offset + old_size, 0, new_size - old_size);
+    }
+
+    return old_mem;
+  }
+
+  void *new_memory = arena_alloc_align(a, new_size, align);
+  size_t copy_size = new_size < old_size ? new_size : old_size;
+  memmove(new_memory, old_memory, copy_size);
+
+  return new_memory;
 }
 
 void *arena_realloc(Arena *a, void *old_memory, size_t old_size,
@@ -89,6 +116,11 @@ void *arena_realloc(Arena *a, void *old_memory, size_t old_size,
 // tesing
 
 void arena_dump(Arena *a, bool dumpbuf) {
+  size_t rows = a->curr_offset / DEFAULT_ALIGNMENT;
+  if (a->curr_offset % DEFAULT_ALIGNMENT) {
+    rows++;
+  }
+
   printf("===== Arena Dump Begin =====\n");
   printf("Buffer Length: %ld\n", a->buf_len);
   printf("Prev Offset  : %ld\n", a->prev_offset);
@@ -100,11 +132,6 @@ void arena_dump(Arena *a, bool dumpbuf) {
   }
 
   printf("Buffer       :\n");
-
-  size_t rows = a->curr_offset / DEFAULT_ALIGNMENT;
-  if (a->curr_offset % DEFAULT_ALIGNMENT) {
-    rows++;
-  }
   for (size_t row = 0; row < rows; row++) {
     printf("%013lx:", row * DEFAULT_ALIGNMENT);
     for (size_t col = 0; col < DEFAULT_ALIGNMENT; col++) {
@@ -138,6 +165,42 @@ int main(void) {
 
   char *msg = "Hello";
   msg = append(&a, msg, ", world!");
+  printf("%s\n", msg);
+
+  arena_dump(&a, true);
+
+  msg = arena_realloc(&a, msg, 14, 16);
+  memcpy(msg + 13, "!!", 2);
+  printf("%s\n", msg);
+
+  arena_dump(&a, true);
+
+  char *msg2 = arena_alloc(&a, 5);
+  sprintf(msg2, "Hi!!");
+
+  arena_dump(&a, true);
+
+  msg = arena_realloc(&a, msg, 16, 16);
+  printf("%s\n", msg);
+
+  arena_dump(&a, true);
+
+  msg = arena_realloc(&a, msg, 16, 13);
+  printf("%s\n", msg);
+
+  arena_dump(&a, true);
+
+  msg = arena_realloc(&a, msg, 13, 5);
+  printf("%s\n", msg);
+
+  arena_dump(&a, true);
+
+  char *msg3 = arena_alloc(&a, 8);
+  sprintf(msg3, ">>>>>>>");
+
+  arena_dump(&a, true);
+
+  msg = arena_realloc(&a, msg, 29, 30);
   printf("%s\n", msg);
 
   arena_dump(&a, true);
