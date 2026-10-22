@@ -6,5 +6,6 @@ ipc/sharedmem/reader
 ipc/sharedmem/sync_reader
 ipc/sharedmem/writer
 ipc/sharedmem/sync_writer
+ipc/pipe
 oop/shape
 regexp/matcher
