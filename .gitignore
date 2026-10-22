@@ -9,3 +9,8 @@ ipc/sharedmem/sync_writer
 ipc/pipe
 oop/shape
 regexp/matcher
+sync/barrier
+sync/cond
+sync/mutex
+sync/rwmutex
+sync/semaphore
