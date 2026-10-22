@@ -1,5 +1,10 @@
+ansiesc/colors_and_styles
 arena/arena
 arena/basic
 arena/myimpl
+ipc/sharedmem/reader
+ipc/sharedmem/sync_reader
+ipc/sharedmem/writer
+ipc/sharedmem/sync_writer
 oop/shape
 regexp/matcher
