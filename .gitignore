@@ -7,7 +7,7 @@ ipc/sharedmem/sync_reader
 ipc/sharedmem/writer
 ipc/sharedmem/sync_writer
 ipc/pipe
-network/socket
+network/tcpclient
 oop/shape
 regexp/matcher
 sync/barrier
