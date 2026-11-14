@@ -7,6 +7,8 @@ ipc/sharedmem/sync_reader
 ipc/sharedmem/writer
 ipc/sharedmem/sync_writer
 ipc/pipe
+make/bin
+make/obj
 network/tcpclient
 oop/shape
 regexp/matcher
