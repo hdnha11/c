@@ -10,6 +10,7 @@ ipc/pipe
 make/bin
 make/obj
 network/ip
+network/server
 network/showip
 network/tcpclient
 oop/shape
