@@ -9,6 +9,7 @@ ipc/sharedmem/sync_writer
 ipc/pipe
 make/bin
 make/obj
+network/client
 network/ip
 network/server
 network/showip
