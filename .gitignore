@@ -11,8 +11,10 @@ make/bin
 make/obj
 network/client
 network/ip
+network/listener
 network/server
 network/showip
+network/talker
 network/tcpclient
 oop/shape
 regexp/matcher
